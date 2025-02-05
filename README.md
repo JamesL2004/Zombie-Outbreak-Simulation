@@ -1,0 +1,1 @@
+This repository contans a Agent based simulation of a Zombie Outbreak using the mesa framework and solara visualization software.
