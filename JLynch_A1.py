@@ -33,6 +33,8 @@ class OutbreakAgent(mesa.Agent):
             self.infect()
             if rn.random() < 0.5:
                 self.dropAmmo()
+        elif self.isZombie == False:
+            self.shootZombie()
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
@@ -47,7 +49,7 @@ class OutbreakAgent(mesa.Agent):
         humans = []
         for cell in cellmates:
             if cell.isZombie == False:
-                humans.add(cell)
+                humans.append(cell)
         if len(humans) > 0:
              other = self.random.choice(humans)
              other.isZombie = True
@@ -57,11 +59,23 @@ class OutbreakAgent(mesa.Agent):
         humans = []
         for cell in cellmates:
             if cell.isZombie == False:
-                humans.add(cell)
+                humans.append(cell)
         if len(humans) > 0:
             other = self.random.choice(humans)
             self.shotsLeft -= 3
             other.shotsLeft += 3
+
+    def shootZombie(self):
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])
+        zombies = []
+        for cell in cellmates:
+            if cell.isZombie == True:
+                zombies.append(cell)
+        if rn.random() < 0.5:
+            if self.shotsLeft > 0:
+                other = self.random.choice(zombies)
+                other.dead = True
+                self.shotsLeft -= 1
 
 
 class OutbreakModel(mesa.Model):
@@ -120,30 +134,30 @@ model_params = {
 
 #modify this function to change output on grid
 def agent_portrayal(agent):
-    size = 10
+    size = 20
     color = "tab:red"
 
-    if agent.wealth > 3:
-        size = 80
+    if agent.dead == True:
+        size = 40
         color = "tab:blue"
-    elif agent.wealth > 2:
-        size = 50
+    elif agent.isZombie == True:
+        size = 60
         color = "tab:green"
-    elif agent.wealth > 1:
+    elif agent.isZombie == False:
         size = 20
-        color = "tab:orange"
+        color ="tab:red"
     return {"size": size, "color": color}
 
-money_model = OutbreakModel(10, 10, 10)
+outbreak_model = OutbreakModel(10, 10, 10)
 
 SpaceGraph = make_space_component(agent_portrayal)
 GiniPlot=make_plot_component("Gini")
 
 page = SolaraViz(
-    money_model,
+    outbreak_model,
     components=[SpaceGraph, GiniPlot],
     model_params=model_params,
-    name="Money Model"
+    name="Zmobie Outbreak Model"
 )
 # This is required to render the visualization in the Jupyter notebook
 page
