@@ -14,7 +14,7 @@ def compute_gini(model):
     B = sum(xi * (T - i) for i, xi in enumerate(x)) / (T * sum(x))
     return 1 + (1 / T) - 2 * B
 
-class MoneyAgent(mesa.Agent):
+class OutbreakAgent(mesa.Agent):
     """An agent with fixed initial wealth."""
 
     def __init__(self, model):
@@ -22,14 +22,15 @@ class MoneyAgent(mesa.Agent):
         super().__init__(model)
 
         # Create the agent's variable and set the initial values.
-        self.wealth = 1
         self.isZombie = False
         self.shotsLeft = 15
+        self.dead = False
 
     def step(self):
         self.move()
-        if self.wealth > 0:
-            self.give_money()
+        if self.isZombie == True:
+            self.infect()
+            
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
@@ -38,16 +39,19 @@ class MoneyAgent(mesa.Agent):
             include_center=False)
         new_position = self.random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
-
-    def give_money(self):
+    
+    def infect(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        if len(cellmates) > 1:
-            other = self.random.choice(cellmates)
-            other.wealth += 1
-            self.wealth -= 1
+        humans = []
+        for cell in cellmates:
+            if cell.isZombie == False:
+                humans.add(cell)
+        if len(humans) > 0:
+             other = self.random.choice(humans)
+             other.isZombie = True
 
 
-class MoneyModel(mesa.Model):
+class OutbreakModel(mesa.Model):
     """A model with some number of agents."""
     def __init__(self, totalAgents=100, width=20, height=20):
         super().__init__()
@@ -58,7 +62,7 @@ class MoneyModel(mesa.Model):
         )
         # Create agents
         for i in range(self.total_agents):
-            agent = MoneyAgent(self)
+            agent = OutbreakAgent(self)
 
             # Add the agent to a random grid cell
             x = self.random.randrange(self.grid.width)
@@ -117,7 +121,7 @@ def agent_portrayal(agent):
         color = "tab:orange"
     return {"size": size, "color": color}
 
-money_model = MoneyModel(10, 10, 10)
+money_model = OutbreakModel(10, 10, 10)
 
 SpaceGraph = make_space_component(agent_portrayal)
 GiniPlot=make_plot_component("Gini")
