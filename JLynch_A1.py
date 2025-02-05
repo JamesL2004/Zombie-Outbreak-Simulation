@@ -28,6 +28,10 @@ class OutbreakAgent(mesa.Agent):
         self.dead = False
 
     def step(self):
+
+        if self.dead == True:
+            return
+
         self.move()
         if self.isZombie == True:
             self.infect()
