@@ -9,11 +9,7 @@ from mesa.datacollection import DataCollector
 from mesa.visualization import SolaraViz, make_plot_component, make_space_component
 
 def compute_gini(model):
-    agent_wealths = [agent.wealth for agent in model.agents]
-    x = sorted(agent_wealths)
-    T = model.total_agents
-    B = sum(xi * (T - i) for i, xi in enumerate(x)) / (T * sum(x))
-    return 1 + (1 / T) - 2 * B
+    return sum(1 for agent in model.agents if not agent.isZombie and not agent.dead)
 
 class OutbreakAgent(mesa.Agent):
     """An agent with fixed initial wealth."""
@@ -77,9 +73,10 @@ class OutbreakAgent(mesa.Agent):
                 zombies.append(cell)
         if rn.random() < 0.5:
             if self.shotsLeft > 0:
-                other = self.random.choice(zombies)
-                other.dead = True
-                self.shotsLeft -= 1
+                if zombies: 
+                    other = self.random.choice(zombies)
+                    other.dead = True 
+                    self.shotsLeft -= 1
 
 
 class OutbreakModel(mesa.Model):
@@ -89,7 +86,7 @@ class OutbreakModel(mesa.Model):
         self.total_agents = 100
         self.grid = mesa.space.MultiGrid(width, height, True)
         self.datacollector = mesa.DataCollector(
-            model_reporters={"Gini": compute_gini}, agent_reporters={"Wealth": "wealth"}
+            model_reporters={"Humans Left": compute_gini}
         )
         # Create agents
         for i in range(self.total_agents):
@@ -99,6 +96,9 @@ class OutbreakModel(mesa.Model):
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
             self.grid.place_agent(agent, (x, y))
+
+            if rn.random() < 0.1:  # 10% chance
+                agent.isZombie = True
 
         self.running = True
         #self.datacollector.collect(self)
@@ -155,13 +155,13 @@ def agent_portrayal(agent):
 outbreak_model = OutbreakModel(10, 10, 10)
 
 SpaceGraph = make_space_component(agent_portrayal)
-GiniPlot=make_plot_component("Gini")
+GiniPlot=make_plot_component("Humans Left")
 
 page = SolaraViz(
     outbreak_model,
     components=[SpaceGraph, GiniPlot],
     model_params=model_params,
-    name="Zmobie Outbreak Model"
+    name="Zombie Outbreak Model"
 )
 # This is required to render the visualization in the Jupyter notebook
 page
