@@ -2,6 +2,7 @@ import mesa
 import seaborn as sns
 import numpy as np
 import pandas as pd
+import random as rn
 import matplotlib.pyplot as plt
 
 from mesa.datacollection import DataCollector
@@ -30,7 +31,8 @@ class OutbreakAgent(mesa.Agent):
         self.move()
         if self.isZombie == True:
             self.infect()
-            
+            if rn.random() < 0.5:
+                self.dropAmmo()
 
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
@@ -49,6 +51,17 @@ class OutbreakAgent(mesa.Agent):
         if len(humans) > 0:
              other = self.random.choice(humans)
              other.isZombie = True
+    
+    def dropAmmo(self):
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])
+        humans = []
+        for cell in cellmates:
+            if cell.isZombie == False:
+                humans.add(cell)
+        if len(humans) > 0:
+            other = self.random.choice(humans)
+            self.shotsLeft -= 3
+            other.shotsLeft += 3
 
 
 class OutbreakModel(mesa.Model):
