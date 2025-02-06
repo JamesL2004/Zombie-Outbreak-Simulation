@@ -22,6 +22,7 @@ class OutbreakAgent(mesa.Agent):
         self.isZombie = False
         self.shotsLeft = 15
         self.dead = False
+        self.cureShots = 5
 
     def step(self):
 
@@ -77,6 +78,12 @@ class OutbreakAgent(mesa.Agent):
                     other = self.random.choice(zombies)
                     other.dead = True 
                     self.shotsLeft -= 1
+        elif rn.random() < 0.7:
+            if self.cureShots > 0:
+                if zombies:
+                    other = self.random.choice(zombies)
+                    other.isZombie = False
+                    self.cureShots -= 1
 
 
 class OutbreakModel(mesa.Model):
