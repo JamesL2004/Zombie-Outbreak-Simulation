@@ -9,10 +9,9 @@ from mesa.datacollection import DataCollector
 from mesa.visualization import SolaraViz, make_plot_component, make_space_component
 
 def compute_gini(model):
-    return sum(1 for agent in model.agents if not agent.isZombie and not agent.dead)
+    return sum(1 for agent in model.agents if not agent.isZombie and not agent.dead) 
 
 class OutbreakAgent(mesa.Agent):
-    """An agent with fixed initial wealth."""
 
     def __init__(self, model):
         # Pass the parameters to the parent class.
@@ -23,6 +22,7 @@ class OutbreakAgent(mesa.Agent):
         self.shotsLeft = 15
         self.dead = False
         self.cureShots = 5
+        self.hitPoints = 3
 
     def step(self):
 
