@@ -17,11 +17,10 @@ class OutbreakAgent(mesa.Agent):
         # Pass the parameters to the parent class.
         super().__init__(model)
 
-        # Create the agent's variable and set the initial values.
         self.isZombie = False
         self.shotsLeft = 15
         self.dead = False
-        self.cureShots = 5
+        self.cureShots = 10
         self.hitPoints = 3
 
     def step(self):
@@ -76,8 +75,11 @@ class OutbreakAgent(mesa.Agent):
             if self.shotsLeft > 0:
                 if zombies: 
                     other = self.random.choice(zombies)
-                    other.dead = True 
-                    self.shotsLeft -= 1
+                    if other.hitPoints > 1:
+                        other.hitPoints -= 1 
+                        self.shotsLeft -= 1
+                    else:
+                        other.dead = True
         elif rn.random() < 0.7:
             if self.cureShots > 0:
                 if zombies:
