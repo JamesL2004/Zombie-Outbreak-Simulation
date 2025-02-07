@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 from mesa.datacollection import DataCollector
 from mesa.visualization import SolaraViz, make_plot_component, make_space_component
 
+#My first added features are the cureShots for humans to try and get more interesting results (line 86 - 90)
+#The second was giving the zombie 3 hitpoints instead of just dying right away after being shot (line 81 - 85)
+
 def compute_gini(model):
     return sum(1 for agent in model.agents if not agent.isZombie and not agent.dead) 
 
